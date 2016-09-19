@@ -108,6 +108,7 @@
       var directionsService;
       var directionsDisplay;
       var stepDisplay;
+      var myRoute;
 
       // Create a new blank array for all the listing markers.
       var stepMarkers = [];
@@ -122,11 +123,12 @@
 
         directionsService = new google.maps.DirectionsService;
         directionsDisplay = new google.maps.DirectionsRenderer;
+        stepDisplay = new google.maps.InfoWindow;
         geocoder = new google.maps.Geocoder();
         document.getElementById('origin').addEventListener('focusout', getOrigin);
         document.getElementById('destination').addEventListener('focusout', getDestination);
         document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
-        
+
         document.getElementById('getSteps').addEventListener('click', showSteps);
       }
 
@@ -197,58 +199,58 @@
           }
         });
       }
-      
+
       function showSteps() {
         // For each step, place a marker, and add the text to the marker's infowindow.
         // Also attach the marker to an array so we can keep track of it and remove it
         // when calculating new routes.
-      var myRoute = directionsDisplay.directions.routes[0].legs[0];
-      var div = document.getElementById('steps');
-      div.innerHTML = "<ol>"; 
-       for (var i = 0; i < myRoute.steps.length; i++) { 
-          div.innerHTML += "<li>" + myRoute.steps[i].instructions + "</li>"; //;
+        myRoute = directionsDisplay.directions.routes[0].legs[0];
+        var div = document.getElementById('steps');
+        div.innerHTML = "<ol>";
+        for (var i = 0; i < myRoute.steps.length; i++) {
+          div.innerHTML += "<li style=\"font-size:small\">" + myRoute.steps[i].instructions + "</li>"; //;
           var marker = stepMarkers[i] = stepMarkers[i] || new google.maps.Marker({
             map: map,
             position: myRoute.steps[i].start_location,
-            title: "Step " + i,
+            title: "Step " + (i+1),
             animation: google.maps.Animation.DROP,
             id: i
           });
-          attachInstructionText(marker, myRoute.steps[i].instructions);
+          google.maps.event.addListener(marker, 'click', function () {
+            // Open an info window when the marker is clicked on, containing the text
+            // of the step.
+            alert(this.id);
+            stepDisplay.setContent(myRoute.steps[this.id].instructions);
+            stepDisplay.open(map, this);
+          });
+          //attachInstructionText(marker, myRoute.steps[i].instructions);
         }
         div.innerHTML += "</ol>";
       }
-      
+
       function attachInstructionText(marker, text) {
-        stepDisplay = new google.maps.InfoWindow
-      google.maps.event.addListener(marker, 'click', function() {
-          // Open an info window when the marker is clicked on, containing the text
-          // of the step.
-          stepDisplay.setContent(text);
-          stepDisplay.open(map, marker);
-        });
       }
-      
+
       function getStreetView(data, status) {
-            if (status == google.maps.StreetViewStatus.OK) {
-              var nearStreetViewLocation = data.location.latLng;
-              var heading = google.maps.geometry.spherical.computeHeading(
-                nearStreetViewLocation, marker.position);
-                infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
-                var panoramaOptions = {
-                  position: nearStreetViewLocation,
-                  pov: {
-                    heading: heading,
-                    pitch: 30
-                  }
-                };
-              var panorama = new google.maps.StreetViewPanorama(
-                document.getElementById('pano'), panoramaOptions);
-            } else {
-              infowindow.setContent('<div>' + marker.title + '</div>' +
-                '<div>No Street View Found</div>');
+        if (status == google.maps.StreetViewStatus.OK) {
+          var nearStreetViewLocation = data.location.latLng;
+          var heading = google.maps.geometry.spherical.computeHeading(
+                  nearStreetViewLocation, marker.position);
+          infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
+          var panoramaOptions = {
+            position: nearStreetViewLocation,
+            pov: {
+              heading: heading,
+              pitch: 30
             }
-          }
+          };
+          var panorama = new google.maps.StreetViewPanorama(
+                  document.getElementById('pano'), panoramaOptions);
+        } else {
+          infowindow.setContent('<div>' + marker.title + '</div>' +
+                  '<div>No Street View Found</div>');
+        }
+      }
     </script>
     <script async defer
             src=
