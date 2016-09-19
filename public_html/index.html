@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html,
+      body {
+        font-family: Arial, sans-serif;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        height: 100%;
+        position: relative;
+      }
+
+      input {
+        font-size: 12px;
+      }
+
+      h1 {
+        color: #525454;
+        font-size: 22px;
+        margin: 0 0 10px 0;
+        text-align: center;
+      }
+
+      #hide-listings,
+      #show-listings {
+        width: 48%;
+      }
+
+      hr {
+        background: #D0D7D9;
+        height: 1px;
+        margin: 20px 0 20px 0;
+        border: none;
+      }
+
+      #map {
+        bottom:0px;
+        height: 100%;
+        left: 362px;
+        position: absolute;
+        right: 0px;
+      }
+
+      .options-box {
+        background: #fff;
+        border: 1px solid #999;
+        border-radius: 3px;
+        height: 100%;
+        line-height: 35px;
+        padding: 10px 10px 30px 10px;
+        text-align: left;
+        width: 340px;
+      }
+
+      #pano {
+        width: 200px;
+        height: 200px;
+      }
+
+      #search-within-time-text {
+        width: 84%;
+      }
+
+      .text {
+        font-size: 12px;
+      }
+
+      #toggle-drawing {
+        width: 27%;
+        position: relative;
+        margin-left: 10px;
+      }
+
+      #zoom-to-area-text {
+        width: 70%;
+      }
+
+      #zoom-to-area {
+        width: 24%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="options-box">
+        <h1>Driver Directions</h1>
+        <div>
+          <input id="origin" type="text" placeholder="Directions From:" value="808 farrish Madison il"><br />
+          <input id="destination" type="text" placeholder="Directions To:" value="404 sunrise marissa il"><br />
+          <input id="getDirections" type="button" value="Get Directions">
+          <input id="getSteps" type="button" value="Get Steps">
+          <div id="steps">         
+          </div>
+        </div>
+      </div>
+      <div id="map"></div>
+    </div>
+    <script>
+      var map;
+      var originMarker;
+      var destinationMarker;
+      var geocoder;
+      var directionsService;
+      var directionsDisplay;
+      var stepDisplay;
+
+      // Create a new blank array for all the listing markers.
+      var stepMarkers = [];
+
+      function initMap() {
+        // Constructor creates a new map - only center and zoom are required.
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 38.6838405, lng: -90.14422689999999}, // location of Madison Yard
+          zoom: 13,
+          mapTypeControl: true
+        });
+
+        directionsService = new google.maps.DirectionsService;
+        directionsDisplay = new google.maps.DirectionsRenderer;
+        geocoder = new google.maps.Geocoder();
+        document.getElementById('origin').addEventListener('focusout', getOrigin);
+        document.getElementById('destination').addEventListener('focusout', getDestination);
+        document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
+        
+        document.getElementById('getSteps').addEventListener('click', showSteps);
+      }
+
+      function getDestination() {
+        var address = document.getElementById('destination').value;
+        geocoder.geocode({'address': address}, function (results, status) {
+          if (status === 'OK') {
+            map.setCenter(results[0].geometry.location);
+            destinationMarker = new google.maps.Marker({
+              map: map,
+              position: results[0].geometry.location
+            });
+            routeZoom();
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+      }
+
+      function getOrigin() {
+        var address = document.getElementById('origin').value;
+        geocoder.geocode({'address': address}, function (results, status) {
+          if (status === 'OK') {
+            map.setCenter(results[0].geometry.location);
+            originMarker = new google.maps.Marker({
+              map: map,
+              position: results[0].geometry.location
+            });
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+      }
+
+      function routeZoom() {
+        var bounds = new google.maps.LatLngBounds();
+        bounds.extend(originMarker.getPosition());
+        bounds.extend(destinationMarker.getPosition());
+//center the map to the geometric center of all markers
+        map.setCenter(bounds.getCenter());
+        map.fitBounds(bounds);
+//remove one zoom level to ensure no marker is on the edge.
+        map.setZoom(map.getZoom() - 1);
+// set a minimum zoom 
+// if you got only 1 marker or all markers are on the same address map will be zoomed too much.
+        if (map.getZoom() > 15) {
+          map.setZoom(15);
+        }
+      }
+
+      function calculateAndDisplayRoute() {
+        directionsService.route({
+          origin: originMarker.position,
+          destination: destinationMarker.position,
+          travelMode: 'DRIVING'
+        }, function (response, status) {
+          if (status === google.maps.DirectionsStatus.OK) {
+            directionsDisplay = new google.maps.DirectionsRenderer({
+              map: map,
+              directions: response,
+              draggable: true,
+              polylineOptions: {
+                strokeColor: 'r'
+              }
+            });
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+      }
+      
+      function showSteps() {
+        // For each step, place a marker, and add the text to the marker's infowindow.
+        // Also attach the marker to an array so we can keep track of it and remove it
+        // when calculating new routes.
+      var myRoute = directionsDisplay.directions.routes[0].legs[0];
+      var div = document.getElementById('steps');
+      div.innerHTML = "<ol>"; 
+       for (var i = 0; i < myRoute.steps.length; i++) { 
+          div.innerHTML += "<li>" + myRoute.steps[i].instructions + "</li>"; //;
+          var marker = stepMarkers[i] = stepMarkers[i] || new google.maps.Marker({
+            map: map,
+            position: myRoute.steps[i].start_location,
+            title: "Step " + i,
+            animation: google.maps.Animation.DROP,
+            id: i
+          });
+          attachInstructionText(marker, myRoute.steps[i].instructions);
+        }
+        div.innerHTML += "</ol>";
+      }
+      
+      function attachInstructionText(marker, text) {
+        stepDisplay = new google.maps.InfoWindow
+      google.maps.event.addListener(marker, 'click', function() {
+          // Open an info window when the marker is clicked on, containing the text
+          // of the step.
+          stepDisplay.setContent(text);
+          stepDisplay.open(map, marker);
+        });
+      }
+      
+      function getStreetView(data, status) {
+            if (status == google.maps.StreetViewStatus.OK) {
+              var nearStreetViewLocation = data.location.latLng;
+              var heading = google.maps.geometry.spherical.computeHeading(
+                nearStreetViewLocation, marker.position);
+                infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
+                var panoramaOptions = {
+                  position: nearStreetViewLocation,
+                  pov: {
+                    heading: heading,
+                    pitch: 30
+                  }
+                };
+              var panorama = new google.maps.StreetViewPanorama(
+                document.getElementById('pano'), panoramaOptions);
+            } else {
+              infowindow.setContent('<div>' + marker.title + '</div>' +
+                '<div>No Street View Found</div>');
+            }
+          }
+    </script>
+    <script async defer
+            src=
+            "https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
+    </script>
+
+  </body>
+</html>
+
