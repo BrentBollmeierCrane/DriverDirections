@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <style>
       html,
       body {
@@ -58,8 +60,8 @@
       }
 
       #pano {
-        width: 600px;
-        height: 600px;
+        width: 400px;
+        height: 400px;
       }
 
       #search-within-time-text {
@@ -83,6 +85,12 @@
       #zoom-to-area {
         width: 24%;
       }
+
+      #directions {
+        font-size: smaller;
+        margin-bottom: 1em;
+        line-height: 120%
+      }
     </style>
   </head>
   <body>
@@ -93,14 +101,15 @@
           <input id="origin" type="text" placeholder="Directions From:" value="808 farrish Madison il"><br />
           <input id="destination" type="text" placeholder="Directions To:" value="404 sunrise marissa il"><br />
           <input id="getDirections" type="button" value="Get Directions">
-          <input id="getSteps" type="button" value="Get Steps">
-          <div id="steps">         
+          <input id="viewRoute" type="button" value="View Route">
+          <div id="directions">
           </div>
         </div>
       </div>
       <div id="map"></div>
     </div>
     <script>
+
       var map;
       var originMarker;
       var destinationMarker;
@@ -112,6 +121,7 @@
 
       // Create a new blank array for all the listing markers.
       var stepMarkers = [];
+      //document.getElementById('steps').addEventListener("click", alert("Click"));
 
       function initMap() {
         // Constructor creates a new map - only center and zoom are required.
@@ -128,8 +138,7 @@
         document.getElementById('origin').addEventListener('focusout', getOrigin);
         document.getElementById('destination').addEventListener('focusout', getDestination);
         document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
-
-        document.getElementById('getSteps').addEventListener('click', showSteps);
+        document.getElementById('viewRoute').addEventListener('click', routeZoom);
       }
 
       function getDestination() {
@@ -155,7 +164,8 @@
             map.setCenter(results[0].geometry.location);
             originMarker = new google.maps.Marker({
               map: map,
-              position: results[0].geometry.location
+              position: results[0].geometry.location,
+              title: "Origin"
             });
           } else {
             alert('Geocode was not successful for the following reason: ' + status);
@@ -180,40 +190,82 @@
       }
 
       function calculateAndDisplayRoute() {
+        // $.when(getOrigin(), getDestination()).done(function () {
+        deleteMarkers();
+        directionsDisplay.setDirections({routes: []});
+//        directionsDisplay=null;
         directionsService.route({
-          origin: originMarker.position,
-          destination: destinationMarker.position,
+          origin: document.getElementById('origin').value,
+          destination: document.getElementById('destination').value,
           travelMode: 'DRIVING'
         }, function (response, status) {
           if (status === google.maps.DirectionsStatus.OK) {
             directionsDisplay = new google.maps.DirectionsRenderer({
               map: map,
+    'preserveViewport': false,
               directions: response,
               draggable: true,
               polylineOptions: {
-                strokeColor: 'r'
-              }
+                strokeColor: 'red'
+              },
+              suppressMarkers: false
             });
+            directionsDisplay.setPanel(document.getElementById("directions"));
           } else {
             window.alert('Directions request failed due to ' + status);
           }
+          directionsDisplay.addListener('directions_changed', showSteps);
+         showSteps();
         });
+        //   });
+      }
+
+      // Sets the map on all markers in the array.
+      function setMapOnAll(map) {
+        for (var i = 0; i < stepMarkers.length; i++) {
+          stepMarkers[i].setMap(map);
+        }
+      }
+
+      // Removes the markers from the map, but keeps them in the array.
+      function clearMarkers() {
+        setMapOnAll(null);
+      }
+
+      // Shows any markers currently in the array.
+      function showMarkers() {
+        setMapOnAll(map);
+      }
+
+      // Deletes all markers in the array by removing references to them.
+      function deleteMarkers() {
+        clearMarkers();
+        stepMarkers = [];
+      }
+
+      function clickStep(step) {
+        map.setCenter(myRoute.steps[step].start_location);
+        map.setZoom(17);
       }
 
       function showSteps() {
         // For each step, place a marker, and add the text to the marker's infowindow.
         // Also attach the marker to an array so we can keep track of it and remove it
         // when calculating new routes.
+        // originMarker.setMap(null);
+        deleteMarkers();
         myRoute = directionsDisplay.directions.routes[0].legs[0];
-        var div = document.getElementById('steps');
-        div.innerHTML = "<ol>";
+        originMarker.setMap(null);
+
         for (var i = 0; i < myRoute.steps.length; i++) {
-          div.innerHTML += "<li style=\"font-size:small\">" + myRoute.steps[i].instructions + "</li>"; //;
+          
           var marker = stepMarkers[i] = stepMarkers[i] || new google.maps.Marker({
+            //if (i>0) {
+            //var marker = new google.maps.Marker({
             map: map,
             position: myRoute.steps[i].start_location,
-            title: "Step " + (i+1),
-            animation: google.maps.Animation.DROP,
+            title: "Step " + (i),
+            //animation: google.maps.Animation.DROP,
             id: i
           });
           google.maps.event.addListener(marker, 'click', function () {
@@ -223,9 +275,8 @@
             stepDisplay.open(map, this);
             populateInfoWindow(this, stepDisplay);
           });
-          //attachInstructionText(marker, myRoute.steps[i].instructions);
+          // }
         }
-        div.innerHTML += "</ol>";
       }
 
       // This function populates the infowindow when the marker is clicked. We'll only allow
@@ -238,7 +289,7 @@
           infowindow.setContent('');
           infowindow.marker = marker;
           // Make sure the marker property is cleared if the infowindow is closed.
-          infowindow.addListener('closeclick', function() {
+          infowindow.addListener('closeclick', function () {
             infowindow.marker = null;
           });
           var streetViewService = new google.maps.StreetViewService();
@@ -250,20 +301,20 @@
             if (status == google.maps.StreetViewStatus.OK) {
               var nearStreetViewLocation = data.location.latLng;
               var heading = google.maps.geometry.spherical.computeHeading(
-                nearStreetViewLocation, marker.position);
-                infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
-                var panoramaOptions = {
-                  position: nearStreetViewLocation,
-                  pov: {
-                    heading: heading,
-                    pitch: 30
-                  }
-                };
+                      nearStreetViewLocation, marker.position);
+              infowindow.setContent('<div id="pano"></div>');
+              var panoramaOptions = {
+                position: nearStreetViewLocation,
+                pov: {
+                  heading: heading,
+                  pitch: 0
+                }
+              };
               var panorama = new google.maps.StreetViewPanorama(
-                document.getElementById('pano'), panoramaOptions);
+                      document.getElementById('pano'), panoramaOptions);
             } else {
               infowindow.setContent('<div>' + marker.title + '</div>' +
-                '<div>No Street View Found</div>');
+                      '<div>No Street View Found</div>');
             }
           }
           // Use streetview service to get the closest streetview image within
