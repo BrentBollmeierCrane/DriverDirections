@@ -98,9 +98,10 @@
       <div class="options-box">
         <h1>Driver Directions</h1>
         <div>
-          <input id="origin" type="text" placeholder="Directions From:" value="808 farrish Madison il"><br />
-          <input id="destination" type="text" placeholder="Directions To:" value="404 sunrise marissa il"><br />
+          <input id="origin" type="text" placeholder="Directions From:" value=""><br />
+          <input id="destination" type="text" placeholder="Directions To:" value=""><br />
           <input id="getDirections" type="button" value="Get Directions">
+          <input id="showSteps" type="button" value="Show Steps">
           <input id="viewRoute" type="button" value="View Route">
           <div id="directions">
           </div>
@@ -132,16 +133,18 @@
         });
 
         directionsService = new google.maps.DirectionsService;
-        directionsDisplay = new google.maps.DirectionsRenderer;
+        //directionsDisplay = new google.maps.DirectionsRenderer;
         stepDisplay = new google.maps.InfoWindow;
         geocoder = new google.maps.Geocoder();
-        document.getElementById('origin').addEventListener('focusout', getOrigin);
+       document.getElementById('origin').addEventListener('focusout', getOrigin);
         document.getElementById('destination').addEventListener('focusout', getDestination);
+        document.getElementById('showSteps').addEventListener('click', showSteps);
         document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
         document.getElementById('viewRoute').addEventListener('click', routeZoom);
       }
 
-      function getDestination() {
+      function getDestination() {if(typeof(destinationMarker) !== "undefined")
+          destinationMarker.setMap(null);
         var address = document.getElementById('destination').value;
         geocoder.geocode({'address': address}, function (results, status) {
           if (status === 'OK') {
@@ -158,6 +161,8 @@
       }
 
       function getOrigin() {
+        if(typeof(originMarker) !== "undefined")
+          originMarker.setMap(null);
         var address = document.getElementById('origin').value;
         geocoder.geocode({'address': address}, function (results, status) {
           if (status === 'OK') {
@@ -189,33 +194,43 @@
         }
       }
 
+      function getNewRoute() {
+        $.when(calculateAndDisplayRoute()).then(function () {
+          showSteps();
+        });
+      }
+
       function calculateAndDisplayRoute() {
         // $.when(getOrigin(), getDestination()).done(function () {
         deleteMarkers();
-        directionsDisplay.setDirections({routes: []});
-//        directionsDisplay=null;
+        //getOrigin();
+        //getDestination();
+        if(typeof(directionsDisplay) !== "undefined")
+            directionsDisplay.setMap(null);
         directionsService.route({
           origin: document.getElementById('origin').value,
           destination: document.getElementById('destination').value,
-          travelMode: 'DRIVING'
+          travelMode: 'DRIVING',
+          provideRouteAlternatives: true
         }, function (response, status) {
           if (status === google.maps.DirectionsStatus.OK) {
+            
             directionsDisplay = new google.maps.DirectionsRenderer({
               map: map,
-    'preserveViewport': false,
+              'preserveViewport': false,
               directions: response,
               draggable: true,
               polylineOptions: {
                 strokeColor: 'red'
               },
-              suppressMarkers: false
+              suppressMarkers: true
             });
             directionsDisplay.setPanel(document.getElementById("directions"));
+          directionsDisplay.addListener('directions_changed', showSteps);
+  //          showSteps();
           } else {
             window.alert('Directions request failed due to ' + status);
           }
-          directionsDisplay.addListener('directions_changed', showSteps);
-         showSteps();
         });
         //   });
       }
@@ -243,10 +258,7 @@
         stepMarkers = [];
       }
 
-      function clickStep(step) {
-        map.setCenter(myRoute.steps[step].start_location);
-        map.setZoom(17);
-      }
+
 
       function showSteps() {
         // For each step, place a marker, and add the text to the marker's infowindow.
@@ -255,10 +267,10 @@
         // originMarker.setMap(null);
         deleteMarkers();
         myRoute = directionsDisplay.directions.routes[0].legs[0];
-        originMarker.setMap(null);
+        //originMarker.setMap(null);
 
         for (var i = 0; i < myRoute.steps.length; i++) {
-          
+
           var marker = stepMarkers[i] = stepMarkers[i] || new google.maps.Marker({
             //if (i>0) {
             //var marker = new google.maps.Marker({
