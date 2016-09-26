@@ -3,98 +3,110 @@
   <head>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <style>
-      html,
-      body {
-        font-family: Arial, sans-serif;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
+    <style>     
+      @media screen {
+        html,
+        body {
+          font-family: Arial, sans-serif;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
 
-      .container {
-        height: 100%;
-        position: relative;
-      }
+        .container {
+          height: 100%;
+          position: relative;
+        }
 
-      input {
-        font-size: 12px;
-      }
+        input {
+          font-size: 12px;
+        }
 
-      h1 {
-        color: #525454;
-        font-size: 22px;
-        margin: 0 0 10px 0;
-        text-align: center;
-      }
+        h1 {
+          color: #525454;
+          font-size: 22px;
+          margin: 0 0 10px 0;
+          text-align: center;
+        }
 
-      #hide-listings,
-      #show-listings {
-        width: 48%;
-      }
+        #hide-listings,
+        #show-listings {
+          width: 48%;
+        }
 
-      hr {
-        background: #D0D7D9;
-        height: 1px;
-        margin: 20px 0 20px 0;
-        border: none;
-      }
+        hr {
+          background: #D0D7D9;
+          height: 1px;
+          margin: 20px 0 20px 0;
+          border: none;
+        }
 
-      #map {
-        bottom:0px;
-        height: 100%;
-        left: 362px;
-        position: absolute;
-        right: 0px;
-      }
+        #map {
+          bottom:0px;
+          height: 8in;
+          width: 10in;
+          left: 322px;
+          top:0px;
+          position: absolute;
+        }
 
-      .options-box {
-        background: #fff;
-        border: 1px solid #999;
-        border-radius: 3px;
-        height: 100%;
-        line-height: 35px;
-        padding: 10px 10px 30px 10px;
-        text-align: left;
-        width: 340px;
-      }
+        .options-box {
+          background: #fff;
+          border: 1px solid #999;
+          border-radius: 3px;
+          height: 100%;
+          line-height: 35px;
+          padding: 10px 10px 30px 10px;
+          text-align: left;
+          width: 300px;
+        }
 
-      #pano {
-        width: 400px;
-        height: 400px;
-      }
+        #pano {
+          width: 400px;
+          height: 400px;
+        }
 
-      #search-within-time-text {
-        width: 84%;
-      }
+        #search-within-time-text {
+          width: 84%;
+        }
 
-      .text {
-        font-size: 12px;
-      }
+        .text {
+          font-size: 12px;
+        }
 
-      #toggle-drawing {
-        width: 27%;
-        position: relative;
-        margin-left: 10px;
-      }
+        #toggle-drawing {
+          width: 27%;
+          position: relative;
+          margin-left: 10px;
+        }
 
-      #zoom-to-area-text {
-        width: 70%;
-      }
+        #zoom-to-area-text {
+          width: 70%;
+        }
 
-      #zoom-to-area {
-        width: 24%;
-      }
+        #zoom-to-area {
+          width: 24%;
+        }
 
-      #directions {
-        font-size: smaller;
-        margin-bottom: 1em;
-        line-height: 120%
+        #directions {
+          font-size: smaller;
+          margin-bottom: 1em;
+          line-height: 120%
+        }}
+      
+      @media print {
+        #map, #map * {
+          visibility:visible;
+        }
+        
+        body * {
+          visibility: hidden;
+        }
       }
-    </style>
-  </head>
-  <body>
-    <div class="container">
+      </style>
+    </head>
+    <body>
+      <div class="container">
       <div class="options-box">
         <h1>Driver Directions</h1>
         <div>
@@ -232,10 +244,7 @@
                 "color": "#000000"
               },
               {
-                "visibility": "on"
-              },
-              {
-                "weight": 5.5
+                "visibility": "off"
               }
             ]
           },
@@ -510,7 +519,7 @@
               directions: response,
               draggable: true,
               polylineOptions: {
-                strokeColor: 'red',
+                strokeColor: 'green',
                 strokeWeight: 10,
                 strokeOpacity: 0.5
               },
@@ -629,7 +638,7 @@
       }
     </script>
     <script async defer
-           src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
     </script>
 
   </body>
