@@ -105,6 +105,8 @@
           <input id="viewRoute" type="button" value="View Route">
           <div id="directions">
           </div>
+          <div id="responses">
+          </div>
         </div>
       </div>
       <div id="map"></div>
@@ -126,24 +128,308 @@
 
       function initMap() {
         // Constructor creates a new map - only center and zoom are required.
+        var styles = [
+          {
+            "featureType": "administrative.country",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative.land_parcel",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative.neighborhood",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative.province",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "landscape",
+            "stylers": [
+              {
+                "visibility": "simplified"
+              }
+            ]
+          },
+          {
+            "featureType": "landscape.man_made",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "landscape.natural",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "poi",
+            "stylers": [
+              {
+                "visibility": "simplified"
+              }
+            ]
+          },
+          {
+            "featureType": "poi.government",
+            "stylers": [
+              {
+                "visibility": "simplified"
+              }
+            ]
+          },
+          {
+            "featureType": "road.arterial",
+            "stylers": [
+              {
+                "visibility": "on"
+              }
+            ]
+          },
+          {
+            "featureType": "road.arterial",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#c0c0c0"
+              },
+              {
+                "visibility": "on"
+              },
+              {
+                "weight": 7
+              }
+            ]
+          },
+          {
+            "featureType": "road.arterial",
+            "elementType": "geometry.stroke",
+            "stylers": [
+              {
+                "color": "#000000"
+              },
+              {
+                "visibility": "on"
+              },
+              {
+                "weight": 5.5
+              }
+            ]
+          },
+          {
+            "featureType": "road.arterial",
+            "elementType": "labels.text",
+            "stylers": [
+              {
+                "color": "#000000"
+              },
+              {
+                "visibility": "on"
+              },
+              {
+                "weight": 7.5
+              }
+            ]
+          },
+          {
+            "featureType": "road.arterial",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#000000"
+              },
+              {
+                "weight": 7.5
+              }
+            ]
+          },
+          {
+            "featureType": "road.arterial",
+            "elementType": "labels.text.stroke",
+            "stylers": [
+              {
+                "color": "#ffffff"
+              },
+              {
+                "weight": 6
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#c0c0c0"
+              },
+              {
+                "visibility": "on"
+              },
+              {
+                "weight": 5
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway",
+            "elementType": "geometry.stroke",
+            "stylers": [
+              {
+                "color": "#000000"
+              },
+              {
+                "visibility": "on"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#000000"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway",
+            "elementType": "labels.text.stroke",
+            "stylers": [
+              {
+                "visibility": "simplified"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway.controlled_access",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#737373"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway.controlled_access",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#c0c0c0"
+              },
+              {
+                "weight": 7.5
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway.controlled_access",
+            "elementType": "geometry.stroke",
+            "stylers": [
+              {
+                "color": "#000000"
+              }
+            ]
+          },
+          {
+            "featureType": "road.local",
+            "stylers": [
+              {
+                "color": "#c0c0c0"
+              }
+            ]
+          },
+          {
+            "featureType": "road.local",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "weight": 4
+              }
+            ]
+          },
+          {
+            "featureType": "road.local",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "weight": 3.5
+              }
+            ]
+          },
+          {
+            "featureType": "road.local",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#000000"
+              }
+            ]
+          },
+          {
+            "featureType": "road.local",
+            "elementType": "labels.text.stroke",
+            "stylers": [
+              {
+                "color": "#ffffff"
+              },
+              {
+                "weight": 4
+              }
+            ]
+          },
+          {
+            "featureType": "transit",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          }
+        ];
+
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 38.6838405, lng: -90.14422689999999}, // location of Madison Yard
           zoom: 13,
-          mapTypeControl: true
+          mapTypeControl: true,
+          styles: styles
         });
 
         directionsService = new google.maps.DirectionsService;
         //directionsDisplay = new google.maps.DirectionsRenderer;
         stepDisplay = new google.maps.InfoWindow;
         geocoder = new google.maps.Geocoder();
-       document.getElementById('origin').addEventListener('focusout', getOrigin);
+        document.getElementById('origin').addEventListener('focusout', getOrigin);
         document.getElementById('destination').addEventListener('focusout', getDestination);
         document.getElementById('showSteps').addEventListener('click', showSteps);
         document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
         document.getElementById('viewRoute').addEventListener('click', routeZoom);
       }
 
-      function getDestination() {if(typeof(destinationMarker) !== "undefined")
+      function getDestination() {
+        if (typeof (destinationMarker) !== "undefined")
           destinationMarker.setMap(null);
         var address = document.getElementById('destination').value;
         geocoder.geocode({'address': address}, function (results, status) {
@@ -161,7 +447,7 @@
       }
 
       function getOrigin() {
-        if(typeof(originMarker) !== "undefined")
+        if (typeof (originMarker) !== "undefined")
           originMarker.setMap(null);
         var address = document.getElementById('origin').value;
         geocoder.geocode({'address': address}, function (results, status) {
@@ -205,29 +491,34 @@
         deleteMarkers();
         //getOrigin();
         //getDestination();
-        if(typeof(directionsDisplay) !== "undefined")
-            directionsDisplay.setMap(null);
+        if (typeof (directionsDisplay) !== "undefined") {
+          directionsDisplay.setMap(null);
+          directionsDisplay.setPanel(null);
+        }
         directionsService.route({
           origin: document.getElementById('origin').value,
           destination: document.getElementById('destination').value,
           travelMode: 'DRIVING',
-          provideRouteAlternatives: true
+          provideRouteAlternatives: false
         }, function (response, status) {
+          //document.getElementById('responses').innerHTML = JSON.stringify(response);
           if (status === google.maps.DirectionsStatus.OK) {
-            
+
             directionsDisplay = new google.maps.DirectionsRenderer({
               map: map,
               'preserveViewport': false,
               directions: response,
               draggable: true,
               polylineOptions: {
-                strokeColor: 'red'
+                strokeColor: 'red',
+                strokeWeight: 10,
+                strokeOpacity: 0.5
               },
               suppressMarkers: true
             });
             directionsDisplay.setPanel(document.getElementById("directions"));
-          directionsDisplay.addListener('directions_changed', showSteps);
-  //          showSteps();
+            directionsDisplay.addListener('directions_changed', showSteps);
+            //          showSteps();
           } else {
             window.alert('Directions request failed due to ' + status);
           }
@@ -310,11 +601,11 @@
           // position of the streetview image, then calculate the heading, then get a
           // panorama from that and set the options
           function getStreetView(data, status) {
-            if (status == google.maps.StreetViewStatus.OK) {
+            if (status === google.maps.StreetViewStatus.OK) {
               var nearStreetViewLocation = data.location.latLng;
               var heading = google.maps.geometry.spherical.computeHeading(
                       nearStreetViewLocation, marker.position);
-              infowindow.setContent('<div id="pano"></div>');
+              infowindow.setContent('<div>' + marker.position + '<div id="pano"></div>');
               var panoramaOptions = {
                 position: nearStreetViewLocation,
                 pov: {
@@ -338,8 +629,7 @@
       }
     </script>
     <script async defer
-            src=
-            "https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
+           src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
     </script>
 
   </body>
