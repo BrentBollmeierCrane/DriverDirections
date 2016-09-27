@@ -1,646 +1,379 @@
 <!DOCTYPE html>
 <html>
-  <head>
+    <head>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <style>     
-      @media screen {
-        html,
-        body {
-          font-family: Arial, sans-serif;
-          height: 100%;
-          margin: 0;
-          padding: 0;
-        }
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <style>     
+            @media screen {
+                html,
+                body {
+                    font-family: Arial, sans-serif;
+                    height: 100%;
+                    margin: 0;
+                    padding: 0;
+                }
 
-        .container {
-          height: 100%;
-          position: relative;
-        }
+                .container {
+                    height: 100%;
+                    position: relative;
+                }
 
-        input {
-          font-size: 12px;
-        }
+                input {
+                    font-size: 12px;
+                }
 
-        h1 {
-          color: #525454;
-          font-size: 22px;
-          margin: 0 0 10px 0;
-          text-align: center;
-        }
+                h1 {
+                    color: #525454;
+                    font-size: 22px;
+                    margin: 0 0 10px 0;
+                    text-align: center;
+                }
 
-        #hide-listings,
-        #show-listings {
-          width: 48%;
-        }
+                #hide-listings,
+                #show-listings {
+                    width: 48%;
+                }
 
-        hr {
-          background: #D0D7D9;
-          height: 1px;
-          margin: 20px 0 20px 0;
-          border: none;
-        }
+                hr {
+                    background: #D0D7D9;
+                    height: 1px;
+                    margin: 20px 0 20px 0;
+                    border: none;
+                }
 
-        #map {
-          bottom:0px;
-          height: 8in;
-          width: 10in;
-          left: 322px;
-          top:0px;
-          position: absolute;
-        }
+                #map {
+                    bottom:0px;
+                    height: 8in;
+                    width: 10in;
+                    left: 322px;
+                    top:0px;
+                    position: absolute;
+                }
 
-        .options-box {
-          background: #fff;
-          border: 1px solid #999;
-          border-radius: 3px;
-          height: 100%;
-          line-height: 35px;
-          padding: 10px 10px 30px 10px;
-          text-align: left;
-          width: 300px;
-        }
+                .options-box {
+                    background: #fff;
+                    border: 1px solid #999;
+                    border-radius: 3px;
+                    height: 100%;
+                    line-height: 35px;
+                    padding: 10px 10px 30px 10px;
+                    text-align: left;
+                    width: 300px;
+                }
 
-        #pano {
-          width: 400px;
-          height: 400px;
-        }
+                #pano {
+                    width: 400px;
+                    height: 400px;
+                }
 
-        #search-within-time-text {
-          width: 84%;
-        }
+                #search-within-time-text {
+                    width: 84%;
+                }
 
-        .text {
-          font-size: 12px;
-        }
+                .text {
+                    font-size: 12px;
+                }
 
-        #toggle-drawing {
-          width: 27%;
-          position: relative;
-          margin-left: 10px;
-        }
+                #toggle-drawing {
+                    width: 27%;
+                    position: relative;
+                    margin-left: 10px;
+                }
 
-        #zoom-to-area-text {
-          width: 70%;
-        }
+                #zoom-to-area-text {
+                    width: 70%;
+                }
 
-        #zoom-to-area {
-          width: 24%;
-        }
+                #zoom-to-area {
+                    width: 24%;
+                }
 
-        #directions {
-          font-size: smaller;
-          margin-bottom: 1em;
-          line-height: 120%
-        }}
-      
-      @media print {
-        #map, #map * {
-          visibility:visible;
-        }
-        
-        body * {
-          visibility: hidden;
-        }
-      }
-      </style>
+                #directions {
+                    font-size: smaller;
+                    margin-bottom: 1em;
+                    line-height: 120%
+                }}
+
+            @media print {
+                #map, #map * {
+                    visibility:visible;
+                }
+
+                body * {
+                    visibility: hidden;
+                }
+            }
+        </style>
     </head>
     <body>
-      <div class="container">
-      <div class="options-box">
-        <h1>Driver Directions</h1>
-        <div>
-          <input id="origin" type="text" placeholder="Directions From:" value=""><br />
-          <input id="destination" type="text" placeholder="Directions To:" value=""><br />
-          <input id="getDirections" type="button" value="Get Directions">
-          <input id="showSteps" type="button" value="Show Steps">
-          <input id="viewRoute" type="button" value="View Route">
-          <div id="directions">
-          </div>
-          <div id="responses">
-          </div>
+        <div class="container">
+            <div class="options-box">
+                <h1>Driver Directions</h1>
+                <div>
+                    <input id="origin" type="text" placeholder="Directions From:" value="" /><br />
+                    <input id="destination" type="text" placeholder="Directions To:" value="" /><br />
+                    <input id="getDirections" type="button" value="Get Directions" />
+                    <input id="viewRoute" type="button" value="Zoom to Route" /><br />
+                    <input id="showSteps" type="checkbox"  value="Show Steps" />
+                    <label for="ShowSteps">Show Turns</label>
+                    <input id="chkColor" type="checkbox"  value="style" />
+                    <label for="chkColor">Grayscale</label><br />
+                    <div id="directions">
+                    </div>
+                    <div id="responses">
+                    </div>
+                </div>
+            </div>
+            <div id="map"></div>
         </div>
-      </div>
-      <div id="map"></div>
-    </div>
-    <script>
+        <script>
+            var map;
+            var originMarker;
+            var destinationMarker;
+            var geocoder;
+            var directionsService;
+            var directionsDisplay;
+            var stepDisplay;
+            var myRoute;
 
-      var map;
-      var originMarker;
-      var destinationMarker;
-      var geocoder;
-      var directionsService;
-      var directionsDisplay;
-      var stepDisplay;
-      var myRoute;
+            // Create a new blank array for all the listing markers.
+            var stepMarkers = [];
+            var BWStyles=[{elementType:"labels.text.fill",stylers:[{color:"#000000"}]},{elementType:"labels.text.stroke",stylers:[{color:"#ffffff"},{weight:2.5}]},{featureType:"landscape",stylers:[{color:"#ffffff"},{visibility:"on"}]},{featureType:"landscape.man_made",stylers:[{color:"#ffffff"}]},{featureType:"road",elementType:"geometry.fill",stylers:[{color:"#c0c0c0"}]},{featureType:"road",elementType:"geometry.stroke",stylers:[{visibility:"off"}]},{featureType:"road",elementType:"labels.text",stylers:[{color:"#000000"}]},{featureType:"road",elementType:"labels.text.stroke",stylers:[{color:"#ffffff"}]}];
+            var colorStyles=[{elementType:"labels.text.fill",stylers:[{color:"#000000"}]},{elementType:"labels.text.stroke",stylers:[{color:"#ffffff"},{weight:2.5}]},{featureType:"administrative.country",stylers:[{visibility:"off"}]},{featureType:"administrative.land_parcel",stylers:[{visibility:"off"}]},{featureType:"administrative.neighborhood",stylers:[{visibility:"off"}]},{featureType:"administrative.province",elementType:"labels.text.fill",stylers:[{color:"#808080"}]},{featureType:"administrative.province",elementType:"labels.text.stroke",stylers:[{visibility:"off"}]},{featureType:"landscape",stylers:[{visibility:"simplified"}]},{featureType:"landscape.natural",stylers:[{visibility:"off"}]}];
+            //document.getElementById('steps').addEventListener("click", alert("Click"));
 
-      // Create a new blank array for all the listing markers.
-      var stepMarkers = [];
-      //document.getElementById('steps').addEventListener("click", alert("Click"));
+            function initMap() {
+                // Constructor creates a new map - only center and zoom are required.
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: 38.6838405, lng: -90.14422689999999}, // location of Madison Yard
+                    zoom: 13,
+                    mapTypeControl: true,
+                    styles: colorStyles
+                });
 
-      function initMap() {
-        // Constructor creates a new map - only center and zoom are required.
-        var styles = [
-          {
-            "featureType": "administrative.country",
-            "stylers": [
-              {
-                "visibility": "off"
-              }
-            ]
-          },
-          {
-            "featureType": "administrative.land_parcel",
-            "stylers": [
-              {
-                "visibility": "off"
-              }
-            ]
-          },
-          {
-            "featureType": "administrative.neighborhood",
-            "stylers": [
-              {
-                "visibility": "off"
-              }
-            ]
-          },
-          {
-            "featureType": "administrative.province",
-            "stylers": [
-              {
-                "visibility": "off"
-              }
-            ]
-          },
-          {
-            "featureType": "landscape",
-            "stylers": [
-              {
-                "visibility": "simplified"
-              }
-            ]
-          },
-          {
-            "featureType": "landscape.man_made",
-            "stylers": [
-              {
-                "visibility": "off"
-              }
-            ]
-          },
-          {
-            "featureType": "landscape.natural",
-            "stylers": [
-              {
-                "visibility": "off"
-              }
-            ]
-          },
-          {
-            "featureType": "poi",
-            "stylers": [
-              {
-                "visibility": "simplified"
-              }
-            ]
-          },
-          {
-            "featureType": "poi.government",
-            "stylers": [
-              {
-                "visibility": "simplified"
-              }
-            ]
-          },
-          {
-            "featureType": "road.arterial",
-            "stylers": [
-              {
-                "visibility": "on"
-              }
-            ]
-          },
-          {
-            "featureType": "road.arterial",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#c0c0c0"
-              },
-              {
-                "visibility": "on"
-              },
-              {
-                "weight": 7
-              }
-            ]
-          },
-          {
-            "featureType": "road.arterial",
-            "elementType": "geometry.stroke",
-            "stylers": [
-              {
-                "color": "#000000"
-              },
-              {
-                "visibility": "off"
-              }
-            ]
-          },
-          {
-            "featureType": "road.arterial",
-            "elementType": "labels.text",
-            "stylers": [
-              {
-                "color": "#000000"
-              },
-              {
-                "visibility": "on"
-              },
-              {
-                "weight": 7.5
-              }
-            ]
-          },
-          {
-            "featureType": "road.arterial",
-            "elementType": "labels.text.fill",
-            "stylers": [
-              {
-                "color": "#000000"
-              },
-              {
-                "weight": 7.5
-              }
-            ]
-          },
-          {
-            "featureType": "road.arterial",
-            "elementType": "labels.text.stroke",
-            "stylers": [
-              {
-                "color": "#ffffff"
-              },
-              {
-                "weight": 6
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#c0c0c0"
-              },
-              {
-                "visibility": "on"
-              },
-              {
-                "weight": 5
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway",
-            "elementType": "geometry.stroke",
-            "stylers": [
-              {
-                "color": "#000000"
-              },
-              {
-                "visibility": "on"
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway",
-            "elementType": "labels.text.fill",
-            "stylers": [
-              {
-                "color": "#000000"
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway",
-            "elementType": "labels.text.stroke",
-            "stylers": [
-              {
-                "visibility": "simplified"
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway.controlled_access",
-            "elementType": "geometry",
-            "stylers": [
-              {
-                "color": "#737373"
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway.controlled_access",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "color": "#c0c0c0"
-              },
-              {
-                "weight": 7.5
-              }
-            ]
-          },
-          {
-            "featureType": "road.highway.controlled_access",
-            "elementType": "geometry.stroke",
-            "stylers": [
-              {
-                "color": "#000000"
-              }
-            ]
-          },
-          {
-            "featureType": "road.local",
-            "stylers": [
-              {
-                "color": "#c0c0c0"
-              }
-            ]
-          },
-          {
-            "featureType": "road.local",
-            "elementType": "geometry",
-            "stylers": [
-              {
-                "weight": 4
-              }
-            ]
-          },
-          {
-            "featureType": "road.local",
-            "elementType": "geometry.fill",
-            "stylers": [
-              {
-                "weight": 3.5
-              }
-            ]
-          },
-          {
-            "featureType": "road.local",
-            "elementType": "labels.text.fill",
-            "stylers": [
-              {
-                "color": "#000000"
-              }
-            ]
-          },
-          {
-            "featureType": "road.local",
-            "elementType": "labels.text.stroke",
-            "stylers": [
-              {
-                "color": "#ffffff"
-              },
-              {
-                "weight": 4
-              }
-            ]
-          },
-          {
-            "featureType": "transit",
-            "stylers": [
-              {
-                "visibility": "off"
-              }
-            ]
-          }
-        ];
-
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 38.6838405, lng: -90.14422689999999}, // location of Madison Yard
-          zoom: 13,
-          mapTypeControl: true,
-          styles: styles
-        });
-
-        directionsService = new google.maps.DirectionsService;
-        //directionsDisplay = new google.maps.DirectionsRenderer;
-        stepDisplay = new google.maps.InfoWindow;
-        geocoder = new google.maps.Geocoder();
-        document.getElementById('origin').addEventListener('focusout', getOrigin);
-        document.getElementById('destination').addEventListener('focusout', getDestination);
-        document.getElementById('showSteps').addEventListener('click', showSteps);
-        document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
-        document.getElementById('viewRoute').addEventListener('click', routeZoom);
-      }
-
-      function getDestination() {
-        if (typeof (destinationMarker) !== "undefined")
-          destinationMarker.setMap(null);
-        var address = document.getElementById('destination').value;
-        geocoder.geocode({'address': address}, function (results, status) {
-          if (status === 'OK') {
-            map.setCenter(results[0].geometry.location);
-            destinationMarker = new google.maps.Marker({
-              map: map,
-              position: results[0].geometry.location
-            });
-            routeZoom();
-          } else {
-            alert('Geocode was not successful for the following reason: ' + status);
-          }
-        });
-      }
-
-      function getOrigin() {
-        if (typeof (originMarker) !== "undefined")
-          originMarker.setMap(null);
-        var address = document.getElementById('origin').value;
-        geocoder.geocode({'address': address}, function (results, status) {
-          if (status === 'OK') {
-            map.setCenter(results[0].geometry.location);
-            originMarker = new google.maps.Marker({
-              map: map,
-              position: results[0].geometry.location,
-              title: "Origin"
-            });
-          } else {
-            alert('Geocode was not successful for the following reason: ' + status);
-          }
-        });
-      }
-
-      function routeZoom() {
-        var bounds = new google.maps.LatLngBounds();
-        bounds.extend(originMarker.getPosition());
-        bounds.extend(destinationMarker.getPosition());
-//center the map to the geometric center of all markers
-        map.setCenter(bounds.getCenter());
-        map.fitBounds(bounds);
-//remove one zoom level to ensure no marker is on the edge.
-        map.setZoom(map.getZoom() - 1);
-// set a minimum zoom 
-// if you got only 1 marker or all markers are on the same address map will be zoomed too much.
-        if (map.getZoom() > 15) {
-          map.setZoom(15);
-        }
-      }
-
-      function getNewRoute() {
-        $.when(calculateAndDisplayRoute()).then(function () {
-          showSteps();
-        });
-      }
-
-      function calculateAndDisplayRoute() {
-        // $.when(getOrigin(), getDestination()).done(function () {
-        deleteMarkers();
-        //getOrigin();
-        //getDestination();
-        if (typeof (directionsDisplay) !== "undefined") {
-          directionsDisplay.setMap(null);
-          directionsDisplay.setPanel(null);
-        }
-        directionsService.route({
-          origin: document.getElementById('origin').value,
-          destination: document.getElementById('destination').value,
-          travelMode: 'DRIVING',
-          provideRouteAlternatives: false
-        }, function (response, status) {
-          //document.getElementById('responses').innerHTML = JSON.stringify(response);
-          if (status === google.maps.DirectionsStatus.OK) {
-
-            directionsDisplay = new google.maps.DirectionsRenderer({
-              map: map,
-              'preserveViewport': false,
-              directions: response,
-              draggable: true,
-              polylineOptions: {
-                strokeColor: 'green',
-                strokeWeight: 10,
-                strokeOpacity: 0.5
-              },
-              suppressMarkers: true
-            });
-            directionsDisplay.setPanel(document.getElementById("directions"));
-            directionsDisplay.addListener('directions_changed', showSteps);
-            //          showSteps();
-          } else {
-            window.alert('Directions request failed due to ' + status);
-          }
-        });
-        //   });
-      }
-
-      // Sets the map on all markers in the array.
-      function setMapOnAll(map) {
-        for (var i = 0; i < stepMarkers.length; i++) {
-          stepMarkers[i].setMap(map);
-        }
-      }
-
-      // Removes the markers from the map, but keeps them in the array.
-      function clearMarkers() {
-        setMapOnAll(null);
-      }
-
-      // Shows any markers currently in the array.
-      function showMarkers() {
-        setMapOnAll(map);
-      }
-
-      // Deletes all markers in the array by removing references to them.
-      function deleteMarkers() {
-        clearMarkers();
-        stepMarkers = [];
-      }
-
-
-
-      function showSteps() {
-        // For each step, place a marker, and add the text to the marker's infowindow.
-        // Also attach the marker to an array so we can keep track of it and remove it
-        // when calculating new routes.
-        // originMarker.setMap(null);
-        deleteMarkers();
-        myRoute = directionsDisplay.directions.routes[0].legs[0];
-        //originMarker.setMap(null);
-
-        for (var i = 0; i < myRoute.steps.length; i++) {
-
-          var marker = stepMarkers[i] = stepMarkers[i] || new google.maps.Marker({
-            //if (i>0) {
-            //var marker = new google.maps.Marker({
-            map: map,
-            position: myRoute.steps[i].start_location,
-            title: "Step " + (i),
-            //animation: google.maps.Animation.DROP,
-            id: i
-          });
-          google.maps.event.addListener(marker, 'click', function () {
-            // Open an info window when the marker is clicked on, containing the text
-            // of the step.
-            stepDisplay.setContent(myRoute.steps[this.id].instructions);
-            stepDisplay.open(map, this);
-            populateInfoWindow(this, stepDisplay);
-          });
-          // }
-        }
-      }
-
-      // This function populates the infowindow when the marker is clicked. We'll only allow
-      // one infowindow which will open at the marker that is clicked, and populate based
-      // on that markers position.
-      function populateInfoWindow(marker, infowindow) {
-        // Check to make sure the infowindow is not already opened on this marker.
-        if (infowindow.marker != marker) {
-          // Clear the infowindow content to give the streetview time to load.
-          infowindow.setContent('');
-          infowindow.marker = marker;
-          // Make sure the marker property is cleared if the infowindow is closed.
-          infowindow.addListener('closeclick', function () {
-            infowindow.marker = null;
-          });
-          var streetViewService = new google.maps.StreetViewService();
-          var radius = 50;
-          // In case the status is OK, which means the pano was found, compute the
-          // position of the streetview image, then calculate the heading, then get a
-          // panorama from that and set the options
-          function getStreetView(data, status) {
-            if (status === google.maps.StreetViewStatus.OK) {
-              var nearStreetViewLocation = data.location.latLng;
-              var heading = google.maps.geometry.spherical.computeHeading(
-                      nearStreetViewLocation, marker.position);
-              infowindow.setContent('<div>' + marker.position + '<div id="pano"></div>');
-              var panoramaOptions = {
-                position: nearStreetViewLocation,
-                pov: {
-                  heading: heading,
-                  pitch: 0
-                }
-              };
-              var panorama = new google.maps.StreetViewPanorama(
-                      document.getElementById('pano'), panoramaOptions);
-            } else {
-              infowindow.setContent('<div>' + marker.title + '</div>' +
-                      '<div>No Street View Found</div>');
+                directionsService = new google.maps.DirectionsService;
+                //directionsDisplay = new google.maps.DirectionsRenderer;
+                stepDisplay = new google.maps.InfoWindow;
+                geocoder = new google.maps.Geocoder();
+                document.getElementById('origin').addEventListener('change', getOrigin);
+                document.getElementById('destination').addEventListener('change', getDestination);
+                document.getElementById('showSteps').addEventListener('click', showSteps);
+                document.getElementById('chkColor').addEventListener('click', setStyle);
+                document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
+                document.getElementById('viewRoute').addEventListener('click', routeZoom);
             }
-          }
-          // Use streetview service to get the closest streetview image within
-          // 50 meters of the markers position
-          streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
-          // Open the infowindow on the correct marker.
-          infowindow.open(map, marker);
-        }
-      }
-    </script>
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
-    </script>
 
-  </body>
+            function setStyle() {
+                if (document.getElementById('chkColor').checked)
+                    map.setOptions({ styles: BWStyles })
+                else
+                    map.setOptions({styles: colorStyles});
+            }
+    
+            function getDestination() {
+                if (typeof (destinationMarker) !== "undefined")
+                    destinationMarker.setMap(null);
+                var address = document.getElementById('destination').value;
+                geocoder.geocode({'address': address}, function (results, status) {
+                    if (status === 'OK') {
+                        map.setCenter(results[0].geometry.location);
+                        destinationMarker = new google.maps.Marker({
+                            map: map,
+                            position: results[0].geometry.location
+                        });
+                        routeZoom();
+                    } else {
+                        alert('Geocode was not successful for the following reason: ' + status);
+                    }
+                });
+            }
+
+            function getOrigin() {
+                if (typeof (originMarker) !== "undefined")
+                    originMarker.setMap(null);
+                var address = document.getElementById('origin').value;
+                geocoder.geocode({'address': address}, function (results, status) {
+                    if (status === 'OK') {
+                        map.setCenter(results[0].geometry.location);
+                        originMarker = new google.maps.Marker({
+                            map: map,
+                            position: results[0].geometry.location,
+                            title: "Origin"
+                        });
+                    } else {
+                        alert('Geocode was not successful for the following reason: ' + status);
+                    }
+                });
+            }
+
+            function routeZoom() {
+                var bounds = new google.maps.LatLngBounds();
+                bounds.extend(originMarker.getPosition());
+                bounds.extend(destinationMarker.getPosition());
+                //center the map to the geometric center of all markers
+                map.setCenter(bounds.getCenter());
+                map.fitBounds(bounds);
+                //remove one zoom level to ensure no marker is on the edge.
+                map.setZoom(map.getZoom() - 1);
+                // set a minimum zoom 
+                // if you got only 1 marker or all markers are on the same address map will be zoomed too much.
+                if (map.getZoom() > 15) {
+                    map.setZoom(15);
+                }
+            }
+
+            function getNewRoute() {
+                $.when(calculateAndDisplayRoute()).then(function () {
+                    showSteps();
+                });
+            }
+
+            function calculateAndDisplayRoute() {
+                // $.when(getOrigin(), getDestination()).done(function () {
+                deleteMarkers();
+                //getOrigin();
+                //getDestination();
+                if (typeof (directionsDisplay) !== "undefined") {
+                    directionsDisplay.setMap(null);
+                    directionsDisplay.setPanel(null);
+                }
+                directionsService.route({
+                    origin: document.getElementById('origin').value,
+                    destination: document.getElementById('destination').value,
+                    travelMode: 'DRIVING',
+                    provideRouteAlternatives: false
+                }, function (response, status) {
+                    //document.getElementById('responses').innerHTML = JSON.stringify(response);
+                    if (status === google.maps.DirectionsStatus.OK) {
+
+                        directionsDisplay = new google.maps.DirectionsRenderer({
+                            map: map,
+                            'preserveViewport': false,
+                            directions: response,
+                            draggable: true,
+                            polylineOptions: {
+                                strokeColor: 'green',
+                                strokeWeight: 10,
+                                strokeOpacity: 0.5
+                            },
+                            suppressMarkers: false
+                        });
+                        directionsDisplay.setPanel(document.getElementById("directions"));
+                        directionsDisplay.addListener('directions_changed', showSteps);
+                        //          showSteps();
+                    } else {
+                        window.alert('Directions request failed due to ' + status);
+                    }
+                });
+                //   });
+            }
+
+            // Sets the map on all markers in the array.
+            function setMapOnAll(map) {
+                for (var i = 0; i < stepMarkers.length; i++) {
+                    stepMarkers[i].setMap(map);
+                }
+            }
+
+            // Removes the markers from the map, but keeps them in the array.
+            function clearMarkers() {
+                setMapOnAll(null);
+            }
+
+            // Shows any markers currently in the array.
+            function showMarkers() {
+                setMapOnAll(map);
+            }
+
+            // Deletes all markers in the array by removing references to them.
+            function deleteMarkers() {
+                clearMarkers();
+                stepMarkers = [];
+            }
+
+            function showSteps() {
+                // For each step, place a marker, and add the text to the marker's infowindow.
+                // Also attach the marker to an array so we can keep track of it and remove it
+                // when calculating new routes.
+                // originMarker.setMap(null);
+                deleteMarkers();
+                myRoute = directionsDisplay.directions.routes[0].legs[0];
+                //originMarker.setMap(null);
+                stepCheck = document.getElementById('showSteps');
+                if (stepCheck.checked) {
+                    for (var i = 0; i < myRoute.steps.length; i++) {
+                        var marker = stepMarkers[i] = stepMarkers[i] || new google.maps.Marker({
+                            //if (i>0) {
+                            //var marker = new google.maps.Marker({
+                            map: map,
+                            position: myRoute.steps[i].start_location,
+                            title: "Step " + (i),
+                            //animation: google.maps.Animation.DROP,
+                            id: i
+                        });
+                        google.maps.event.addListener(marker, 'click', function () {
+                            // Open an info window when the marker is clicked on, containing the text
+                            // of the step.
+                            stepDisplay.setContent(myRoute.steps[this.id].instructions);
+                            stepDisplay.open(map, this);
+                            populateInfoWindow(this, stepDisplay);
+                        });
+                        // }
+                    }
+                }
+            }
+
+            // This function populates the infowindow when the marker is clicked. We'll only allow
+            // one infowindow which will open at the marker that is clicked, and populate based
+            // on that markers position.
+            function populateInfoWindow(marker, infowindow) {
+                // Check to make sure the infowindow is not already opened on this marker.
+                if (infowindow.marker != marker) {
+                    // Clear the infowindow content to give the streetview time to load.
+                    infowindow.setContent('');
+                    infowindow.marker = marker;
+                    // Make sure the marker property is cleared if the infowindow is closed.
+                    infowindow.addListener('closeclick', function () {
+                        infowindow.marker = null;
+                    });
+                    var streetViewService = new google.maps.StreetViewService();
+                    var radius = 50;
+                    // In case the status is OK, which means the pano was found, compute the
+                    // position of the streetview image, then calculate the heading, then get a
+                    // panorama from that and set the options
+                    function getStreetView(data, status) {
+                        if (status === google.maps.StreetViewStatus.OK) {
+                            var nearStreetViewLocation = data.location.latLng;
+                            var heading = google.maps.geometry.spherical.computeHeading(
+                                    nearStreetViewLocation, marker.position);
+                            infowindow.setContent('<div id="pano"></div>');
+                            var panoramaOptions = {
+                                position: nearStreetViewLocation,
+                                pov: {
+                                    heading: heading,
+                                    pitch: 0
+                                }
+                            };
+                            var panorama = new google.maps.StreetViewPanorama(
+                                    document.getElementById('pano'), panoramaOptions);
+                        } else {
+                            infowindow.setContent('<div>' + marker.title + '</div>' +
+                                    '<div>No Street View Found</div>');
+                        }
+                    }
+                    // Use streetview service to get the closest streetview image within
+                    // 50 meters of the markers position
+                    streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+                    // Open the infowindow on the correct marker.
+                    infowindow.open(map, marker);
+                }
+            }
+        </script>
+        <!-- Google Maps Key: https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo  -->
+        <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
+        </script>
+
+    </body>
 </html>
 
