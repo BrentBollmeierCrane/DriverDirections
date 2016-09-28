@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script src="./printThis.js"></script>
         <style>     
             @media screen {
                 html,
@@ -41,10 +41,19 @@
                     border: none;
                 }
 
-                #map {
+                .map-landscape {
                     bottom:0px;
                     height: 8in;
                     width: 10in;
+                    left: 322px;
+                    top:0px;
+                    position: absolute;
+                }
+
+                .map-portrait {
+                    bottom:0px;
+                    height: 10in;
+                    width: 8in;
                     left: 322px;
                     top:0px;
                     position: absolute;
@@ -92,14 +101,26 @@
                     font-size: smaller;
                     margin-bottom: 1em;
                     line-height: 120%
-                }}
+                }
+            }
 
             @media print {
-                #map, #map * {
+                #options {
+                    visibility:hidden;
+                    height:0px
+                }
+                
+                #printContainer.directions #directions, #printContainer.directions #directions * {
                     visibility:visible;
+                    font-size:large
+                }
+                
+                #printContainer.map #map, #printContainer.map #map * {
+                    visibility:visible;
+                    font-size:large
                 }
 
-                body * {
+                #printContainer * {
                     visibility: hidden;
                 }
             }
@@ -108,8 +129,8 @@
     <body>
         <div class="container">
             <div class="options-box">
-                <h1>Driver Directions</h1>
-                <div>
+                <div id="options">
+                    <h1>Driver Directions</h1>
                     <input id="origin" type="text" placeholder="Directions From:" value="" /><br />
                     <input id="destination" type="text" placeholder="Directions To:" value="" /><br />
                     <input id="getDirections" type="button" value="Get Directions" />
@@ -118,13 +139,22 @@
                     <label for="ShowSteps">Show Turns</label>
                     <input id="chkColor" type="checkbox"  value="style" />
                     <label for="chkColor">Grayscale</label><br />
-                    <div id="directions">
-                    </div>
-                    <div id="responses">
-                    </div>
+                    <input type="radio" name="chkOrientation" id="chkOrientationLandscape" value="landscape" checked>Landscape 
+                    <input type="radio" name="chkOrientation" id="chkOrientationPortrait" value="portrait">Portrait<br>
+                    <input id="chkPrintDirections" type="checkbox"  value="style" />
+                    <label for="chkPrintDirections">Print Directions</label> 
+                    <input id="chkPrintMap" type="checkbox"  value="style" />
+                    <label for="chkPrintMap">Print Map</label><br />
+                    <button id="btnPrintDirections" type="button">Print</button>
+                </div>
+                <div id="printContainer">
+                    <div id="directions"></div>
+                    <div id="responses"></div>
                 </div>
             </div>
-            <div id="map"></div>
+        </div>
+        <div id="map" class="map-landscape">
+
         </div>
         <script>
             var map;
@@ -138,8 +168,8 @@
 
             // Create a new blank array for all the listing markers.
             var stepMarkers = [];
-            var BWStyles=[{elementType:"labels.text.fill",stylers:[{color:"#000000"}]},{elementType:"labels.text.stroke",stylers:[{color:"#ffffff"},{weight:2.5}]},{featureType:"landscape",stylers:[{color:"#ffffff"},{visibility:"on"}]},{featureType:"landscape.man_made",stylers:[{color:"#ffffff"}]},{featureType:"road",elementType:"geometry.fill",stylers:[{color:"#c0c0c0"}]},{featureType:"road",elementType:"geometry.stroke",stylers:[{visibility:"off"}]},{featureType:"road",elementType:"labels.text",stylers:[{color:"#000000"}]},{featureType:"road",elementType:"labels.text.stroke",stylers:[{color:"#ffffff"}]}];
-            var colorStyles=[{elementType:"labels.text.fill",stylers:[{color:"#000000"}]},{elementType:"labels.text.stroke",stylers:[{color:"#ffffff"},{weight:2.5}]},{featureType:"administrative.country",stylers:[{visibility:"off"}]},{featureType:"administrative.land_parcel",stylers:[{visibility:"off"}]},{featureType:"administrative.neighborhood",stylers:[{visibility:"off"}]},{featureType:"administrative.province",elementType:"labels.text.fill",stylers:[{color:"#808080"}]},{featureType:"administrative.province",elementType:"labels.text.stroke",stylers:[{visibility:"off"}]},{featureType:"landscape",stylers:[{visibility:"simplified"}]},{featureType:"landscape.natural",stylers:[{visibility:"off"}]}];
+            var BWStyles = [{elementType: "labels.text.fill", stylers: [{color: "#000000"}]}, {elementType: "labels.text.stroke", stylers: [{color: "#ffffff"}, {weight: 2.5}]}, {featureType: "landscape", stylers: [{color: "#ffffff"}, {visibility: "on"}]}, {featureType: "landscape.man_made", stylers: [{color: "#ffffff"}]}, {featureType: "road", elementType: "geometry.fill", stylers: [{color: "#c0c0c0"}]}, {featureType: "road", elementType: "geometry.stroke", stylers: [{visibility: "off"}]}, {featureType: "road", elementType: "labels.text", stylers: [{color: "#000000"}]}, {featureType: "road", elementType: "labels.text.stroke", stylers: [{color: "#ffffff"}]}];
+            var colorStyles = [{elementType: "labels.text.fill", stylers: [{color: "#000000"}]}, {elementType: "labels.text.stroke", stylers: [{color: "#ffffff"}, {weight: 2.5}]}, {featureType: "administrative.country", stylers: [{visibility: "off"}]}, {featureType: "administrative.land_parcel", stylers: [{visibility: "off"}]}, {featureType: "administrative.neighborhood", stylers: [{visibility: "off"}]}, {featureType: "administrative.province", elementType: "labels.text.fill", stylers: [{color: "#808080"}]}, {featureType: "administrative.province", elementType: "labels.text.stroke", stylers: [{visibility: "off"}]}, {featureType: "landscape", stylers: [{visibility: "simplified"}]}, {featureType: "landscape.natural", stylers: [{visibility: "off"}]}];
             //document.getElementById('steps').addEventListener("click", alert("Click"));
 
             function initMap() {
@@ -161,15 +191,35 @@
                 document.getElementById('chkColor').addEventListener('click', setStyle);
                 document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
                 document.getElementById('viewRoute').addEventListener('click', routeZoom);
+                document.getElementById("chkOrientationLandscape").addEventListener('change', changeOrientation);
+                document.getElementById("chkOrientationPortrait").addEventListener('change', changeOrientation);
+                document.getElementById("btnPrintMap").addEventListener('click', printPage);
+                document.getElementById("btnPrintDirections").addEventListener('click', printPage);
+            }
+
+            function printPage() {
+                document.getElementById("printContainer").className = "map";
+                window.print();
             }
 
             function setStyle() {
                 if (document.getElementById('chkColor').checked)
-                    map.setOptions({ styles: BWStyles })
+                    map.setOptions({styles: BWStyles});
                 else
                     map.setOptions({styles: colorStyles});
             }
-    
+
+            function changeOrientation() {
+                var orientation = document.getElementsByName("chkOrientation");
+                orientation.forEach(setOrientation);
+            }
+
+            function setOrientation(item) {
+                var theMap = document.getElementById("map");
+                if (item.checked)
+                    theMap.className = "map-" + item.value;
+            }
+
             function getDestination() {
                 if (typeof (destinationMarker) !== "undefined")
                     destinationMarker.setMap(null);
