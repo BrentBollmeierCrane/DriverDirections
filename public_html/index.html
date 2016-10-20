@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script src="./printThis.js"></script>
-    <style>     
+<head>
+
+    <script src=
+    "https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js">
+    </script>
+    <script src="./printThis.js">
+    </script>
+    <style>
+     
       @media screen {
         html,
         body {
@@ -19,7 +24,7 @@
         }
 
         input {
-          font-size: 12px;
+          font-size: 14px;
         }
 
         h1 {
@@ -64,7 +69,6 @@
           border: 1px solid #999;
           border-radius: 3px;
           height: 100%;
-          line-height: 35px;
           padding: 10px 10px 30px 10px;
           text-align: left;
           width: 300px;
@@ -72,7 +76,7 @@
 
         #pano {
           width: 400px;
-          height: 400px;
+          height: 300px;
         }
 
         #search-within-time-text {
@@ -102,7 +106,18 @@
           margin-bottom: 1em;
           line-height: 120%;
         }
+        
+        .gm-style-iw {
+          line-height: 14px;
+        }
       }
+      
+      #divButtons p {
+        margin:.5em;
+        text-align: left;
+      }
+      
+    
 
       @media print {
         #options {
@@ -129,38 +144,49 @@
         
       }
     </style>
-  </head>
-  <body>
+    <title></title>
+</head>
+<body>
     <div class="container">
-      <div class="options-box">
-        <div id="options">
-          <h1>Driver Directions</h1>
-          <input id="origin" type="text" placeholder="Directions From:" value="" /><br />
-          <input id="destination" type="text" placeholder="Directions To:" value="" /><br />
-          <input id="getDirections" type="button" value="Get Directions" />
-          <input id="viewRoute" type="button" value="Zoom to Route" /><br />
-          <input id="showSteps" type="checkbox"  value="Show Steps" />
-          <label for="ShowSteps">Show Turns</label>
-          <input id="chkColor" type="checkbox"  value="style" />
-          <label for="chkColor">Grayscale</label><br />
-          <input type="radio" name="chkOrientation" id="chkOrientationLandscape" value="landscape" checked>Landscape 
-          <input type="radio" name="chkOrientation" id="chkOrientationPortrait" value="portrait">Portrait<br>
-          <label for="listPrintWhat">Print</label>
-          <select id="listPrintWhat">
-            <option value="both" selected>Both</option>
-            <option value="map">Map</option>
-            <option value="directions">Directions</option>
-          </select>
-          <button id="btnPrintDirections" type="button">Print</button>
-
+        <div class="options-box">
+            <div id="options">
+                <h1>Driver Directions</h1>
+                <P><label for="origin">From:</label><br>
+                <input id="origin" placeholder="Directions From:" type="text"
+                value=""><input id="fromMadison" type="button" value=
+                "Madison Yard"></p>
+                <P><label for="destination">To:</label><br>
+                <input id="destination" placeholder="Directions To:" type=
+                "text" value=""><input id="toMadison" type="button" value=
+                "Madison Yard"></p></div>
+          <div id="divButtons"><P><input id="getDirections" type="button" value="Get Directions">
+              <input id="viewRoute" type="button" value="Zoom to Route"></p>
+            <P><input id="showSteps" type="checkbox" value="Show Steps">
+                <label for="ShowSteps">Show Turns</label> <input id="chkColor"
+                type="checkbox" value="style"> <label for=
+                "chkColor">Grayscale</label></p>
+                <P><input checked id="chkOrientationLandscape" name=
+                "chkOrientation" type="radio" value="landscape">Landscape
+                <input id="chkOrientationPortrait" name="chkOrientation" type=
+                       "radio" value="portrait">Portrait</p>
+                <P><label for="listPrintWhat">Print</label> <select id=
+                "listPrintWhat">
+                    <option selected value="both">
+                        Both
+                    </option>
+                    <option value="map">
+                        Map
+                    </option>
+                    <option value="directions">
+                        Directions
+                    </option>
+                </select> <button id="btnPrintDirections" type=
+                        "button">Print</button></p></div>
+            <div id="printContainer">
+                <div id="directions"></div>
+                <div class="map-landscape" id="map"></div>
+            </div>
         </div>
-        <div id="printContainer">
-          <div id="directions"></div>
-          <div id="map" class="map-landscape">
-          </div>
-        </div>
-      </div>
-
     </div>
     <script>
       var map;
@@ -171,6 +197,7 @@
       var directionsDisplay;
       var stepDisplay;
       var myRoute;
+      var MadisonAddress = "808 Farrish Madison, IL";
 
       // Create a new blank array for all the listing markers.
       var stepMarkers = [];
@@ -188,8 +215,20 @@
         });
 
         directionsService = new google.maps.DirectionsService;
-        //directionsDisplay = new google.maps.DirectionsRenderer;
-        stepDisplay = new google.maps.InfoWindow;
+        directionsDisplay = new google.maps.DirectionsRenderer({
+          map: map,
+          'preserveViewport': false,
+          draggable: true,
+          suppressMarkers: true,
+          polylineOptions: {
+            strokeColor: 'green',
+            strokeWeight: 10,
+            strokeOpacity: 0.5
+          },
+          panel: document.getElementById("directions")
+          });
+        directionsDisplay.addListener('directions_changed', showSteps);
+        //stepDisplay = new google.maps.InfoWindow;
         geocoder = new google.maps.Geocoder();
         document.getElementById('origin').addEventListener('change', getOrigin);
         document.getElementById('destination').addEventListener('change', getDestination);
@@ -200,6 +239,18 @@
         document.getElementById("chkOrientationLandscape").addEventListener('change', changeOrientation);
         document.getElementById("chkOrientationPortrait").addEventListener('change', changeOrientation);
         document.getElementById("btnPrintDirections").addEventListener('click', printPage);
+        document.getElementById("fromMadison").addEventListener('click', fromMadisonClick);
+        document.getElementById("toMadison").addEventListener('click', toMadisonClick);
+      }
+
+      function fromMadisonClick() {
+        document.getElementById('origin').value = MadisonAddress;
+        getOrigin();
+      }
+      
+      function toMadisonClick() {
+        document.getElementById('destination').value = MadisonAddress;
+        getDestination();
       }
 
       function printPage() {
@@ -235,6 +286,12 @@
             destinationMarker = new google.maps.Marker({
               map: map,
               position: results[0].geometry.location
+            });
+            google.maps.event.addListener(destinationMarker, 'click', function () {
+              // Open an info window when the marker is clicked on, containing the text
+              // of the step.
+              stepDisplay = new google.maps.InfoWindow;
+              populateInfoWindow(this, stepDisplay);
             });
             calculateAndDisplayRoute();
             routeZoom();
@@ -285,46 +342,22 @@
         });
       }
 
+      
       function calculateAndDisplayRoute() {
-        // $.when(getOrigin(), getDestination()).done(function () {
-        deleteMarkers();
-        //getOrigin();
-        //getDestination();
-        if (typeof (directionsDisplay) !== "undefined") {
-          directionsDisplay.setMap(null);
-          directionsDisplay.setPanel(null);
-        }
         directionsService.route({
-          origin: document.getElementById('origin').value,
-          destination: document.getElementById('destination').value,
-          travelMode: 'DRIVING',
-          provideRouteAlternatives: false
-        }, function (response, status) {
-          //document.getElementById('responses').innerHTML = JSON.stringify(response);
-          if (status === google.maps.DirectionsStatus.OK) {
-
-            directionsDisplay = new google.maps.DirectionsRenderer({
-              map: map,
-              'preserveViewport': false,
-              directions: response,
-              draggable: true,
-              polylineOptions: {
-                strokeColor: 'green',
-                strokeWeight: 10,
-                strokeOpacity: 0.5
-              },
-              suppressMarkers: false
-            });
-            directionsDisplay.setPanel(document.getElementById("directions"));
-            directionsDisplay.addListener('directions_changed', showSteps);
-            //          showSteps();
-          } //else {
-          //window.alert('Directions request failed due to ' + status);
-          //}
+        origin: document.getElementById('origin').value,
+        destination: document.getElementById('destination').value,
+        //waypoints: [{location: 'Adelaide, SA'}, {location: 'Broken Hill, NSW'}],
+        travelMode: 'DRIVING',
+        provideRouteAlternatives: false
+        }, function(response, status) {
+        if (status === 'OK') {
+          directionsDisplay.setDirections(response);
+          //deleteMarkers();
+        }
         });
-        //   });
       }
-
+      
       // Sets the map on all markers in the array.
       function setMapOnAll(map) {
         for (var i = 0; i < stepMarkers.length; i++) {
@@ -346,6 +379,8 @@
       function deleteMarkers() {
         clearMarkers();
         stepMarkers = [];
+        //originMarker.setMap(null);
+        //destinationMarker.setMap(null);
       }
 
       function showSteps() {
@@ -371,14 +406,20 @@
             google.maps.event.addListener(marker, 'click', function () {
               // Open an info window when the marker is clicked on, containing the text
               // of the step.
+              stepDisplay = new google.maps.InfoWindow;
               stepDisplay.setContent(myRoute.steps[this.id].instructions);
               stepDisplay.open(map, this);
-              populateInfoWindow(this, stepDisplay);
+              //populateInfoWindow(this, stepDisplay);
             });
             // }
           }
         }
       }
+
+      function makeInfoContent(instructions){
+            var html = "<div class=\"infoWindow\">" + instructions + "</div>";
+            return(html);
+              }
 
       // This function populates the infowindow when the marker is clicked. We'll only allow
       // one infowindow which will open at the marker that is clicked, and populate based
@@ -403,7 +444,7 @@
               var nearStreetViewLocation = data.location.latLng;
               var heading = google.maps.geometry.spherical.computeHeading(
                       nearStreetViewLocation, marker.position);
-              infowindow.setContent('<div id="pano"></div>');
+              infowindow.setContent('<div id="pano"><\/div>');
               var panoramaOptions = {
                 position: nearStreetViewLocation,
                 pov: {
@@ -414,8 +455,8 @@
               var panorama = new google.maps.StreetViewPanorama(
                       document.getElementById('pano'), panoramaOptions);
             } else {
-              infowindow.setContent('<div>' + marker.title + '</div>' +
-                      '<div>No Street View Found</div>');
+              infowindow.setContent('<div>' + marker.title + '<\/div>' +
+                      '<div>No Street View Found<\/div>');
             }
           }
           // Use streetview service to get the closest streetview image within
@@ -425,12 +466,12 @@
           infowindow.open(map, marker);
         }
       }
-    </script>
+    </script> 
     <!-- Google Maps Key: https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo  -->
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
+     
+    <script async defer src=
+    "https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap">
     </script>
-
-  </body>
+</body>
 </html>
 
