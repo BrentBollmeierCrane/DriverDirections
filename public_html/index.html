@@ -116,13 +116,17 @@
       }
       }
       @media print {
-        #options {
+        .options-box {
           visibility:hidden;
           height:0px
         }
 
         #directions {
           width:100%;
+        }
+        
+        #printContainer.map #directions {
+          visibility: hidden;
         }
         
         #printContainer.map #directions {
@@ -175,11 +179,11 @@
                     </option>
                 </select> <button id="btnPrintDirections" type="button">Print</button></p>
             </div>
+        </div>
             <div id="printContainer">
                 <div id="directions"></div>
                 <div class="map-landscape" id="map"></div>
             </div>
-        </div>
     </div>
     <script>
       var map;
@@ -212,7 +216,7 @@
           map: map,
           'preserveViewport': false,
           draggable: true,
-          suppressMarkers: true,
+          suppressMarkers: false,
           polylineOptions: {
             strokeColor: 'green',
             strokeWeight: 10,
@@ -223,8 +227,8 @@
         directionsDisplay.addListener('directions_changed', showSteps);
         //stepDisplay = new google.maps.InfoWindow;
         geocoder = new google.maps.Geocoder();
-        document.getElementById('origin').addEventListener('change', getOrigin);
-        document.getElementById('destination').addEventListener('change', getDestination);
+        //document.getElementById('origin').addEventListener('change', getOrigin);
+        //document.getElementById('destination').addEventListener('change', getDestination);
         document.getElementById('showSteps').addEventListener('click', showSteps);
         document.getElementById('chkColor').addEventListener('click', setStyle);
         document.getElementById('chkGreyscale').addEventListener('click', setStyle);
