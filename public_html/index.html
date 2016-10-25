@@ -162,26 +162,35 @@
           <div id="divButtons"><P><input id="getDirections" type="button" value="Get Directions">
               <input id="viewRoute" type="button" value="Zoom to Route"></p>
             <P><input id="showSteps" type="checkbox" value="Show Steps">
-                <label for="ShowSteps">Show Turns</label> <input id="chkColor"
+                <label for="ShowSteps">Show Turns</label></p>
+            
+            <p>
+                <input checked id="chkColor" name=
+            "chkDisplayColor" type="radio" value="landscape">Color
+            <input id="chkGreyscale" name="chkDisplayColor" type=
+                   "radio" value="portrait">Grayscale
+                <!--<input id="chkColor"
                 type="checkbox" value="style"> <label for=
-                "chkColor">Grayscale</label></p>
+                "chkColor">Grayscale</label>-->
+                </p>
+            
                 <P><input checked id="chkOrientationLandscape" name=
-                "chkOrientation" type="radio" value="landscape">Landscape
-                <input id="chkOrientationPortrait" name="chkOrientation" type=
-                       "radio" value="portrait">Portrait</p>
-                <P><label for="listPrintWhat">Print</label> <select id=
-                "listPrintWhat">
-                    <option selected value="both">
-                        Both
-                    </option>
-                    <option value="map">
-                        Map
-                    </option>
-                    <option value="directions">
-                        Directions
-                    </option>
-                </select> <button id="btnPrintDirections" type=
-                        "button">Print</button></p></div>
+            "chkOrientation" type="radio" value="landscape">Landscape
+            <input id="chkOrientationPortrait" name="chkOrientation" type=
+                   "radio" value="portrait">Portrait</p>
+            <P><label for="listPrintWhat">Print</label> <select id=
+            "listPrintWhat">
+                <option selected value="both">
+                    Both
+                </option>
+                <option value="map">
+                    Map
+                </option>
+                <option value="directions">
+                    Directions
+                </option>
+            </select> <button id="btnPrintDirections" type=
+                    "button">Print</button></p></div>
             <div id="printContainer">
                 <div id="directions"></div>
                 <div class="map-landscape" id="map"></div>
@@ -234,6 +243,7 @@
         document.getElementById('destination').addEventListener('change', getDestination);
         document.getElementById('showSteps').addEventListener('click', showSteps);
         document.getElementById('chkColor').addEventListener('click', setStyle);
+        document.getElementById('chkGreyscale').addEventListener('click', setStyle);
         document.getElementById('getDirections').addEventListener('click', calculateAndDisplayRoute);
         document.getElementById('viewRoute').addEventListener('click', routeZoom);
         document.getElementById("chkOrientationLandscape").addEventListener('change', changeOrientation);
@@ -260,9 +270,9 @@
 
       function setStyle() {
         if (document.getElementById('chkColor').checked)
-          map.setOptions({styles: BWStyles});
-        else
           map.setOptions({styles: colorStyles});
+        else
+          map.setOptions({styles: BWStyles});
       }
 
       function changeOrientation() {
