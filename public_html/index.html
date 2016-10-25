@@ -2,13 +2,11 @@
 <html>
 <head>
 
-    <script src=
-    "https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js">
     </script>
     <script src="./printThis.js">
     </script>
     <style>
-     
       @media screen {
         html,
         body {
@@ -110,15 +108,13 @@
         .gm-style-iw {
           line-height: 14px;
         }
-      }
+      
       
       #divButtons p {
         margin:.5em;
         text-align: left;
       }
-      
-    
-
+      }
       @media print {
         #options {
           visibility:hidden;
@@ -140,8 +136,6 @@
         #printContainer.both #directions {
           page-break-before: always;
         }
-        
-        
       }
     </style>
     <title></title>
@@ -151,46 +145,36 @@
         <div class="options-box">
             <div id="options">
                 <h1>Driver Directions</h1>
-                <P><label for="origin">From:</label><br>
-                <input id="origin" placeholder="Directions From:" type="text"
-                value=""><input id="fromMadison" type="button" value=
-                "Madison Yard"></p>
-                <P><label for="destination">To:</label><br>
-                <input id="destination" placeholder="Directions To:" type=
-                "text" value=""><input id="toMadison" type="button" value=
-                "Madison Yard"></p></div>
-          <div id="divButtons"><P><input id="getDirections" type="button" value="Get Directions">
-              <input id="viewRoute" type="button" value="Zoom to Route"></p>
-            <P><input id="showSteps" type="checkbox" value="Show Steps">
-                <label for="ShowSteps">Show Turns</label></p>
-            
-            <p>
-                <input checked id="chkColor" name=
-            "chkDisplayColor" type="radio" value="landscape">Color
-            <input id="chkGreyscale" name="chkDisplayColor" type=
-                   "radio" value="portrait">Grayscale
-                <!--<input id="chkColor"
-                type="checkbox" value="style"> <label for=
-                "chkColor">Grayscale</label>-->
-                </p>
-            
-                <P><input checked id="chkOrientationLandscape" name=
-            "chkOrientation" type="radio" value="landscape">Landscape
-            <input id="chkOrientationPortrait" name="chkOrientation" type=
-                   "radio" value="portrait">Portrait</p>
-            <P><label for="listPrintWhat">Print</label> <select id=
-            "listPrintWhat">
-                <option selected value="both">
-                    Both
-                </option>
-                <option value="map">
-                    Map
-                </option>
-                <option value="directions">
-                    Directions
-                </option>
-            </select> <button id="btnPrintDirections" type=
-                    "button">Print</button></p></div>
+                <p><label for="origin">From:</label><br>
+                <input id="origin" placeholder="Directions From:" type="text" value=""><input id="fromMadison" type=
+                "button" value="Madison Yard"></p>
+                <p><label for="destination">To:</label><br>
+                <input id="destination" placeholder="Directions To:" type="text" value=""><input id="toMadison" type=
+                "button" value="Madison Yard"></p>
+            </div>
+            <div id="divButtons">
+                <p style="text-align:center;"><input style="height:50px;width:150px" id="getDirections" type="button" value="Get Directions"></p>
+                <p style="border-top-style:solid;border-top-width:1px;margin-top:2em">&nbsp;</p>
+                <p style="text-align:center;"><input id="viewRoute" type="button" value="Zoom to Route"></p>
+                <p style="text-align:center;"><input id="showSteps" type="checkbox" value="Show Steps"> <label for="ShowSteps">Show
+                Turns</label></p>
+                <p style="text-align:center;"><input checked id="chkColor" name="chkDisplayColor" type="radio" value="landscape">Color <input id=
+                "chkGreyscale" name="chkDisplayColor" type="radio" value="portrait">Grayscale</p>
+                <p style="text-align:center;"><input checked id="chkOrientationLandscape" name="chkOrientation" type="radio" value=
+                "landscape">Landscape <input id="chkOrientationPortrait" name="chkOrientation" type="radio" value=
+                "portrait">Portrait</p>
+                <p style="text-align:center;"><label for="listPrintWhat">Print</label> <select id="listPrintWhat">
+                    <option selected value="both">
+                        Both
+                    </option>
+                    <option value="map">
+                        Map
+                    </option>
+                    <option value="directions">
+                        Directions
+                    </option>
+                </select> <button id="btnPrintDirections" type="button">Print</button></p>
+            </div>
             <div id="printContainer">
                 <div id="directions"></div>
                 <div class="map-landscape" id="map"></div>
@@ -427,7 +411,7 @@
       }
 
       function makeInfoContent(instructions){
-            var html = "<div class=\"infoWindow\">" + instructions + "</div>";
+            var html = "<div class=\"infoWindow\">" + instructions + "<\/div>";
             return(html);
               }
 
@@ -484,4 +468,3 @@
     </script>
 </body>
 </html>
-
