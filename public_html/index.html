@@ -248,7 +248,7 @@
       }
 
       function printPage() {
-        document.getElementById("printContainer").className = "both";
+        document.getElementById("printContainer").className = document.getElementById('listPrintWhat').value;
         window.print();
       }
 
