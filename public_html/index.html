@@ -26,18 +26,6 @@
           <p style="text-align:center;">
             <input id="viewRoute" type="button" value="Zoom to Route">
           </p>
-          <!--<p style="text-align:center;">
-            <input id="showSteps" type="checkbox" value="Show Steps"> 
-            <label for="ShowSteps">Show Turns</label>
-          </p>
-          <p style="text-align:center;"><input checked id="chkColor" name="chkDisplayColor" type="radio" value="landscape">Color 
-            <input id="chkGreyscale" name="chkDisplayColor" type="radio" value="portrait">Grayscale
-          </p> 
-          <p style="text-align:center;">
-            <input checked id="chkOrientationLandscape" name="chkOrientation" type="radio" value=
-                   "landscape">Landscape 
-            <input id="chkOrientationPortrait" name="chkOrientation" type="radio" value=
-                   "portrait">Portrait</p>-->
           <p style="text-align:center;"><label for="listPrintWhat">Print</label> 
             <select id="listPrintWhat">
               <option selected value="both">Both</option>
@@ -47,15 +35,12 @@
             <button id="btnPrintDirections" type="button">Print</button></p>
         </div>
       </div>
-        <div id="map"></div>
+      <div id="map"></div>
       <div id="printContainer" class="both">
         <div id="divDirections"></div>
-        <div id="staticMap"><img id="imgMap" alt="Static Map" /></div>
+        <!--<div id="staticMap"><img id="imgMap" alt="Static Map" /></div>-->
       </div>
     </div>
-
-    <!-- Google Maps Key: https://maps.googleapis.com/maps/api/js?key=AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo&v=3&callback=initMap AIzaSyDT5v7gX-u8R2KQxiufx20iK36xklE6KTo  -->
-
     <script async defer src=
             "https://maps.googleapis.com/maps/api/js?key=AIzaSyBVtnKA2R1VrMjidHMI302s5dTq1nIYpNU&v=3&callback=initMap">
     </script>
